@@ -4,6 +4,7 @@ namespace App\Api\V1;
 
 use App\Db\Connection;
 use App\Repositories;
+use Exception;
 
 include_once '../../../index.php';
 
@@ -18,16 +19,17 @@ $tasks->{[
 ][$_SERVER["REQUEST_METHOD"]]}();
 
 class Tasks {
-    public $repTasks;
-    public $repTags;
-    public $repTasksTags;
+    private $db;
+    private $repTasks;
+    private $repTags;
+    private $repTasksTags;
 
     function __construct() {
-        $db = Connection::getInstance()->getConnection();
+        $this->db = Connection::getInstance()->getConnection();
 
-        $this->repTasks = new Repositories\Tasks($db);
-        $this->repTags = new Repositories\Tags($db);
-        $this->repTasksTags = new Repositories\TasksTags($db);
+        $this->repTasks = new Repositories\Tasks($this->db);
+        $this->repTags = new Repositories\Tags($this->db);
+        $this->repTasksTags = new Repositories\TasksTags($this->db);
 
         $this->repTasks->fill();
         $this->repTags->fill();
@@ -35,19 +37,29 @@ class Tasks {
     }
 
     function create() {
-        $task = $this->repTasks->create([
-            'name' => htmlspecialchars($_POST['name']),
-            'description' => htmlspecialchars($_POST['description']),
-            'date' => date(\DateTime::ISO8601)
-        ]);
+        $this->db->beginTransaction();
 
-        if (!empty($_POST['tags'])) {
-            $this->repTasksTags->createAll([
-                'taskId' => $task['id']
-            ], array_map(function($tag) {
-                return htmlspecialchars($tag);
-            }, $_POST['tags']));
-        }
+        try {
+            $task = $this->repTasks->create([
+                'name' => htmlspecialchars($_POST['name']),
+                'description' => htmlspecialchars($_POST['description']),
+                'date' => date(\DateTime::ISO8601)
+            ]);
+
+            if (!empty($_POST['tags'])) {
+                $this->repTasksTags->createAll([
+                    'taskId' => $task['id']
+                ], array_map(function($tag) {
+                    return htmlspecialchars($tag);
+                }, $_POST['tags']));
+            }
+
+            $this->db->commit();
+        } catch (Exception $error) {
+            echo $error->getMessage();
+
+            $this->db->rollback();
+        };
 
         return $this->read($task['id']);
     }

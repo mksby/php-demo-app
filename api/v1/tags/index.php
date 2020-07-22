@@ -18,9 +18,9 @@ $tags->{[
 ][$_SERVER["REQUEST_METHOD"]]}();
 
 class Tags {
-    public $repTasks;
-    public $repTags;
-    public $repTasksTags;
+    private $repTasks;
+    private $repTags;
+    private $repTasksTags;
 
     function __construct() {
         $db = Connection::getInstance()->getConnection();
