@@ -7,15 +7,15 @@ use App\Repositories;
 
 include_once '../../../index.php';
 
-$tasks = new Tasks();
-$tasks->{[
+$tags = new Tags();
+$tags->{[
     'POST' => 'create',
     'GET' => 'read',
     'PUT' => 'update',
     'DELETE' => 'delete'
 ][$_SERVER["REQUEST_METHOD"]]}();
 
-class Tasks {
+class Tags {
     public $repTasks;
     public $repTags;
     public $repTasksTags;
@@ -33,11 +33,7 @@ class Tasks {
     }
 
     function create() {
-        echo json_encode($this->repTasks->create([
-            ':name' => htmlspecialchars($_POST['name']),
-            ':description' => htmlspecialchars($_POST['description']),
-            ':date' => date(\DateTime::ISO8601)
-        ]));
+        echo 'create data';
     }
 
     function read() {
@@ -45,22 +41,22 @@ class Tasks {
 
         if ($id) {
             $tasksTags = $this->repTasksTags->readAll([
-                'taskId' => $id
+                'tagId' => $id
             ]);
 
-            $tagsIds = array_map(function($item) {
-                return $item['tagId'];
+            $tasksIds = array_map(function($item) {
+                return $item['taskId'];
             }, $tasksTags);
 
-            echo json_encode($this->repTasks->read([
+            echo json_encode($this->repTags->read([
                 'id' => $id
             ], [
-                'tags' => $this->repTags->readAll([
-                    'ids' => $tagsIds
+                'tasks' => $this->repTasks->readAll([
+                    'ids' => $tasksIds
                 ])
             ]));
         } else {
-            echo json_encode($this->repTasks->readAll([]));
+            echo json_encode($this->repTags->readAll([]));
         }
     }
 
