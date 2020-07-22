@@ -7,6 +7,8 @@ use App\Repositories;
 
 include_once '../../../index.php';
 
+header('Content-type: application/json');
+
 $tags = new Tags();
 $tags->{[
     'POST' => 'create',

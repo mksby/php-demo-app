@@ -2,8 +2,6 @@
 
 namespace App\Repositories;
 
-header('Content-type: application/json');
-
 class Tags {
     private $connection;
 

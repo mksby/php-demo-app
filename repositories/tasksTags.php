@@ -9,6 +9,26 @@ class TasksTags {
         $this->connection = $connection;
     }
 
+    function create($params) {
+        $this->connection->prepare(
+            "INSERT INTO tasks (taskId, tagId) VALUES
+                (:taskId, :tagId)
+            "
+        )->execute($params);
+
+        return $this->readAll([]);
+    }
+
+    function createAll($params, $tags) {
+        $tagsValues = implode(',', array_map(function($item) {
+            return "(:taskId, $item)";
+        }, $tags));
+
+        $this->connection->prepare(
+            "INSERT INTO tasksTags (taskId, tagId) VALUES $tagsValues"
+        )->execute($params);
+    }
+
     function readAll($params) {
         if ($params['taskId']) {
             $query = $this->connection->prepare(

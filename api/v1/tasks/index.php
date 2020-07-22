@@ -7,6 +7,8 @@ use App\Repositories;
 
 include_once '../../../index.php';
 
+header('Content-type: application/json');
+
 $tasks = new Tasks();
 $tasks->{[
     'POST' => 'create',
@@ -33,15 +35,25 @@ class Tasks {
     }
 
     function create() {
-        echo json_encode($this->repTasks->create([
-            ':name' => htmlspecialchars($_POST['name']),
-            ':description' => htmlspecialchars($_POST['description']),
-            ':date' => date(\DateTime::ISO8601)
-        ]));
+        $task = $this->repTasks->create([
+            'name' => htmlspecialchars($_POST['name']),
+            'description' => htmlspecialchars($_POST['description']),
+            'date' => date(\DateTime::ISO8601)
+        ]);
+
+        if (!empty($_POST['tags'])) {
+            $this->repTasksTags->createAll([
+                'taskId' => $task['id']
+            ], array_map(function($tag) {
+                return htmlspecialchars($tag);
+            }, $_POST['tags']));
+        }
+
+        return $this->read($task['id']);
     }
 
-    function read() {
-        $id = htmlspecialchars($_GET['id']);
+    function read($id) {
+        $id = $id or htmlspecialchars($_GET['id']);
 
         if ($id) {
             $tasksTags = $this->repTasksTags->readAll([

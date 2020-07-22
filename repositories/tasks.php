@@ -2,8 +2,6 @@
 
 namespace App\Repositories;
 
-header('Content-type: application/json');
-
 class Tasks {
     private $connection;
 
@@ -18,7 +16,9 @@ class Tasks {
             "
         )->execute($params);
 
-        return $this->readAll([]);
+        return array_merge([
+            'id' => $this->connection->lastInsertId()
+        ], $params);
     }
 
     function read($params, $deps) {
