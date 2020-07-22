@@ -33,7 +33,10 @@ class Tags {
     }
 
     function create() {
-        echo 'create data';
+        echo json_encode($this->repTags->create([
+            ':name' => htmlspecialchars($_POST['name']),
+            ':date' => date(\DateTime::ISO8601)
+        ]));
     }
 
     function read() {

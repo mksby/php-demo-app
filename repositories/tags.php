@@ -11,6 +11,16 @@ class Tags {
         $this->connection = $connection;
     }
 
+    function create($params) {
+        $this->connection->prepare(
+            "INSERT INTO tags (name, date) VALUES
+                (:name, :date)
+            "
+        )->execute($params);
+
+        return $this->readAll([]);
+    }
+
     function read($params, $deps) {
         $query = $this->connection->prepare(
             "SELECT * FROM tags WHERE id = :id"
